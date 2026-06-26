@@ -70,14 +70,88 @@ pip install requests
 
 # 3. Configure environment
 export FEISHU_APP_ID="your_app_id"
-export FEISHU_APP_SECRET="your_app_secret"
-
-# 4. Start poll daemon
+export FEISHU_APP_SECRET=*** 4. Start poll daemon
 python3 scripts/feishu_poll_daemon.py &
 
 # 5. Send a message
 python3 scripts/msg_to_bot.py "Hello, Bot!"
 ```
+
+## 📋 Complete Deployment Guide
+
+### Prerequisites
+
+- ✅ Two Hermes Agent instances (deployed on different servers or different ports on the same server)
+- ✅ Two Feishu custom applications (one for each Hermes instance)
+- ✅ One Feishu group chat (for bot-to-bot communication)
+
+### Step 1: Create Feishu Custom Applications
+
+1. Log in to [Feishu Open Platform](https://open.feishu.cn/)
+2. Create two custom applications (e.g., `Hermes-Bot-A` and `Hermes-Bot-B`)
+3. Get the `APP_ID` and `APP_SECRET` for each application
+4. Enable the following permissions for each application:
+   - `im:message.group_at_msg.include_bot:readonly` (receive group messages)
+   - `im:message:send_as_bot` (send messages)
+
+### Step 2: Create Feishu Group Chat and Add Bots
+
+1. Create a new group chat in Feishu (e.g., `Bot-Communication`)
+2. Add both bots (`Hermes-Bot-A` and `Hermes-Bot-B`) to the group chat
+3. Record the group chat's `CHAT_ID` (can be found in Feishu admin console)
+
+### Step 3: Configure Hermes Instances
+
+**For Hermes-Bot-A:**
+```bash
+# Configure environment variables
+export FEISHU_APP_ID="cli_xxxxxxxxxxxxxxxx"  # Bot-A's APP_ID
+export FEISHU_APP_SECRET="your_bot_a_secret"
+export FEISHU_CHAT_ID="oc_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"  # Group chat ID
+
+# Configure config.yaml
+cat >> ~/.hermes/config.yaml << EOF
+feishu:
+  require_mention: false
+  allow_bots: all
+  group_rules:
+    $FEISHU_CHAT_ID:
+      policy: open
+EOF
+
+# Start Hermes
+hermes gateway run
+```
+
+**For Hermes-Bot-B:**
+```bash
+# Configure environment variables
+export FEISHU_APP_ID="cli_yyyyyyyyyyyyyyyy"  # Bot-B's APP_ID
+export FEISHU_APP_SECRET="your_bot_b_secret"
+export FEISHU_CHAT_ID="oc_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"  # Same group chat ID
+
+# Configure config.yaml (same as Bot-A)
+cat >> ~/.hermes/config.yaml << EOF
+feishu:
+  require_mention: false
+  allow_bots: all
+  group_rules:
+    $FEISHU_CHAT_ID:
+      policy: open
+EOF
+
+# Start Hermes
+hermes gateway run
+```
+
+### Step 4: Test Bot-to-Bot Communication
+
+Send a message in the group chat:
+```
+@Hermes-Bot-A Please help me check the weather
+```
+
+Bot-A will receive the message and process it, then send a reply with @ using `msg_to_bot.py`, which Bot-B can also receive.
 
 ## Permissions Required
 
@@ -90,4 +164,5 @@ MIT
 ## Related Projects
 
 - [Hermes Agent](https://github.com/NousResearch/hermes-agent) - Open-source AI agent framework
+- [Hermes Feishu Integration Docs](https://hermes-agent.nousresearch.com/docs/user-guide/messaging/feishu) - Official Feishu platform configuration guide
 - [Hermes Feishu Integration Docs](https://hermes-agent.nousresearch.com/docs/user-guide/messaging/feishu) - Official Feishu platform configuration guide

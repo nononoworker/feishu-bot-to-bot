@@ -70,14 +70,89 @@ pip install requests
 
 # 3. 配置环境变量
 export FEISHU_APP_ID="your_app_id"
-export FEISHU_APP_SECRET="your_app_secret"
-
+export FEISHU_APP_SECRET="your...n
 # 4. 启动轮询守护进程
 python3 scripts/feishu_poll_daemon.py &
 
 # 5. 发送消息
 python3 scripts/msg_to_bot.py "你好，Bot！"
 ```
+
+## 📋 完整部署步骤
+
+### 前提条件
+
+- ✅ 两个 Hermes Agent 实例（分别部署在不同服务器或同一服务器的不同端口）
+- ✅ 两个飞书自建应用（每个 Hermes 实例对应一个）
+- ✅ 一个飞书群聊（用于机器人间通信）
+
+### 步骤 1：创建飞书自建应用
+
+1. 登录 [飞书开放平台](https://open.feishu.cn/)
+2. 创建两个自建应用（例如：`Hermes-Bot-A` 和 `Hermes-Bot-B`）
+3. 获取每个应用的 `APP_ID` 和 `APP_SECRET`
+4. 为每个应用开通以下权限：
+   - `im:message.group_at_msg.include_bot:readonly`（接收群消息）
+   - `im:message:send_as_bot`（发送消息）
+
+### 步骤 2：创建飞书群聊并添加机器人
+
+1. 在飞书中创建一个新群聊（例如：`Bot-Communication`）
+2. 将两个机器人（`Hermes-Bot-A` 和 `Hermes-Bot-B`）都添加到群聊中
+3. 记录群聊的 `CHAT_ID`（可在飞书管理后台查看）
+
+### 步骤 3：配置 Hermes 实例
+
+**对于 Hermes-Bot-A：**
+```bash
+# 配置环境变量
+export FEISHU_APP_ID="cli_xxxxxxxxxxxxxxxx"  # Bot-A 的 APP_ID
+export FEISHU_APP_SECRET="your_bot_a_secret"
+export FEISHU_CHAT_ID="oc_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"  # 群聊 ID
+
+# 配置 config.yaml
+cat >> ~/.hermes/config.yaml << EOF
+feishu:
+  require_mention: false
+  allow_bots: all
+  group_rules:
+    $FEISHU_CHAT_ID:
+      policy: open
+EOF
+
+# 启动 Hermes
+hermes gateway run
+```
+
+**对于 Hermes-Bot-B：**
+```bash
+# 配置环境变量
+export FEISHU_APP_ID="cli_yyyyyyyyyyyyyyyy"  # Bot-B 的 APP_ID
+export FEISHU_APP_SECRET="your_bot_b_secret"
+export FEISHU_CHAT_ID="oc_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"  # 同一个群聊 ID
+
+# 配置 config.yaml（与 Bot-A 相同）
+cat >> ~/.hermes/config.yaml << EOF
+feishu:
+  require_mention: false
+  allow_bots: all
+  group_rules:
+    $FEISHU_CHAT_ID:
+      policy: open
+EOF
+
+# 启动 Hermes
+hermes gateway run
+```
+
+### 步骤 4：测试 Bot-to-Bot 通信
+
+在群聊中发送消息：
+```
+@Hermes-Bot-A 请帮我查询天气
+```
+
+Bot-A 会收到消息并处理，然后通过 `msg_to_bot.py` 发送带 @ 的回复，Bot-B 也能收到。
 
 ## 权限要求
 
