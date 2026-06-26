@@ -2,10 +2,12 @@
 # 推送代码到GitHub
 # 用法: bash push.sh YOUR_GITHUB_TOKEN
 
-TOKEN=*** [ -z "$TOKEN" ]; then
+if [ -z "$1" ]; then
     echo "用法: bash push.sh YOUR_GITHUB_TOKEN"
     exit 1
 fi
+
+TOKEN=$1
 
 cd ~/feishu-bot-to-bot
 git branch -M main

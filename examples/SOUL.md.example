@@ -25,7 +25,7 @@ python3 ~/.hermes/scripts/msg_to_bot.py --file /path/to/file "说明文字"
 ### 对方bot信息
 - 名称：Hermes 6月云服务器 2h4g
 - open_id：ou_8bdac7cdb8ff50d51b0dfbeffaf4c65d
-- App ID：cli_aaa4e64ea6f99bc6
+- App ID：cli_YOUR_APP_ID
 
 ### 例外
 - 只有当用户明确说"不用@对方"时，才可以直接回复

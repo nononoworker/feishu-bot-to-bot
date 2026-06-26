@@ -85,7 +85,7 @@ tail -10 ~/.hermes/feishu_poll_queue.jsonl | python3 -c "
 import sys, json
 for line in sys.stdin:
     d = json.loads(line)
-    if d.get('sender_id') == 'cli_aaa4e64ea6f99bc6':  # 对方bot的app_id
+    if d.get('sender_id') == 'cli_YOUR_APP_ID':  # 对方bot的app_id
         has_at = '@' in d.get('text', '') or 'at' in d.get('content', '')
         status = '✅' if has_at else '❌ 直接回复!'
         print(f\"{status} {d['msg_type']}: {d.get('text', '')[:80]}\")
