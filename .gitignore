@@ -1,0 +1,36 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+*.egg
+.venv/
+venv/
+env/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Credentials & secrets
+*.env
+.env.*
+credentials.*
+
+# Logs & state
+*.log
+*.jsonl
+processed_msg_ids.json
+
+# Received files from feishu
+feishu_received_files/
+
+# Hermes state
+.hermes/
